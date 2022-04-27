@@ -44,6 +44,27 @@ export function idbPromise(storeName, method, object) {
         console.log('error', e);
       };
 
+      // check which value (method) we passed into the function 
+      switch (method) {
+        // if method is put...
+        case 'put':
+          store.put(object);
+          resolve(object);
+          break;
+        case 'get':
+          const all = store.getAll();
+          all.onsuccess = function () {
+            resolve(all.result);
+          };
+          break;
+        case 'delte':
+          store.delete(object._id);
+          break;
+        default:
+          console.log('No valid method');
+          break;
+      }
+
       // when the transaction is complete, close the connection
       tx.oncomplete = function () {
         db.close();
