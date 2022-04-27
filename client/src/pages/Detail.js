@@ -1,67 +1,65 @@
 import React, { useEffect, useState } from 'react';
-import Cart from "../components/Cart"
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@apollo/client';
 
+import Cart from '../components/Cart';
 import { useStoreContext } from '../utils/GlobalState';
-import { REMOVE_FROM_CART, ADD_TO_CART, UPDATE_CART_QUANTITY, UPDATE_PRODUCTS } from '../utils/actions';
-
+import {
+  REMOVE_FROM_CART,
+  UPDATE_CART_QUANTITY,
+  ADD_TO_CART,
+  UPDATE_PRODUCTS,
+} from '../utils/actions';
 import { QUERY_PRODUCTS } from '../utils/queries';
 import spinner from '../assets/spinner.gif';
-
 
 function Detail() {
   const [state, dispatch] = useStoreContext();
   const { id } = useParams();
 
-  const [currentProduct, setCurrentProduct] = useState({})
+  const [currentProduct, setCurrentProduct] = useState({});
 
   const { loading, data } = useQuery(QUERY_PRODUCTS);
 
   const { products, cart } = state;
 
-  // console.log(currentProduct)
-
   useEffect(() => {
     if (products.length) {
-      setCurrentProduct(products.find(product => product._id === id));
+      setCurrentProduct(products.find((product) => product._id === id));
     } else if (data) {
       dispatch({
         type: UPDATE_PRODUCTS,
-        products: data.products
+        products: data.products,
       });
     }
   }, [products, data, dispatch, id]);
 
-  // add items to cart 
   const addToCart = () => {
     const itemInCart = cart.find((cartItem) => cartItem._id === id);
-
     if (itemInCart) {
       dispatch({
         type: UPDATE_CART_QUANTITY,
         _id: id,
-        purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1
+        purchaseQuantity: parseInt(itemInCart.purchaseQuantity) + 1,
       });
     } else {
       dispatch({
         type: ADD_TO_CART,
-        product: { ...currentProduct, purchaseQuantity: 1 }
+        product: { ...currentProduct, purchaseQuantity: 1 },
       });
     }
   };
 
-  // remove items from cart
   const removeFromCart = () => {
     dispatch({
       type: REMOVE_FROM_CART,
-      _id: currentProduct._id
-    })
-  }
+      _id: currentProduct._id,
+    });
+  };
 
   return (
     <>
-      {currentProduct ? (
+      {currentProduct && cart ? (
         <div className="container my-1">
           <Link to="/">← Back to Products</Link>
 
@@ -73,7 +71,7 @@ function Detail() {
             <strong>Price:</strong>${currentProduct.price}{' '}
             <button onClick={addToCart}>Add to Cart</button>
             <button
-              disabled={!cart.find(p => p._id === currentProduct._id)}
+              disabled={!cart.find((p) => p._id === currentProduct._id)}
               onClick={removeFromCart}
             >
               Remove from Cart
